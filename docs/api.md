@@ -7,6 +7,7 @@
 | 健康检查 / 运行设置 | `GET /api/health`、`GET/PUT /api/settings` |
 | 导入 / 样本查询 / 修改元数据 | `POST /api/import`、`GET /api/samples`、`PATCH /api/samples/{id}` |
 | 音频 / 波形 | `GET /api/samples/{id}/audio`、`GET /api/samples/{id}/waveform` |
+| 单曲报告 / 导出 | `GET /api/samples/{id}/report`、`GET /api/samples/{id}/report/{html,json}` |
 | 任务创建 / 查询 | `POST /api/jobs`、`GET /api/jobs`、`GET /api/jobs/{id}` |
 | 取消 / 重试 | `POST /api/jobs/{id}/cancel`、`POST /api/jobs/{id}/retry` |
 | 报告 / 导出 | `GET /api/report`、`GET /api/export/{json,csv,html,bundle}` |
@@ -55,6 +56,8 @@
 取消是异步的，需继续查询直到状态结束。重试保留原任务输入快照，只重排失败、跳过、取消项；修改输入后应创建新任务。
 
 ## 报告筛选
+
+单曲报告默认显示最新结果；传入 `job_id` 可查看该任务的输入快照和分数，例如 `/api/samples/{id}/report?job_id={task_id}`。HTML/JSON 导出支持同一个参数。歌曲未参与该任务时返回 404。
 
 `/api/report` 及导出接口支持 `ids`（逗号分隔）、`model`、`version`、`audio_type`、`tag` 查询参数。所有指标遵循相同筛选范围；跨类型音乐不计算配对差异。
 

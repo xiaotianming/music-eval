@@ -39,6 +39,70 @@ def numeric_metrics(results):
     return out
 
 
+def sample_report(sample, job_id=None):
+    """Read a song's latest results or the immutable results of one task."""
+    job = None
+    if job_id:
+        job = db.one("SELECT id,status,created FROM jobs WHERE id=?", (job_id,))
+        items = db.rows("SELECT * FROM items WHERE job_id=? AND sample_id=? AND metric!='fad' ORDER BY rowid",
+                        (job_id, sample["id"]))
+        if not job or not items:
+            raise ValueError("该任务中没有这首音频的单曲评估记录")
+        decoded = [db.decode_item(it) for it in items]
+        sample = decoded[0]["snapshot"]["sample"]
+        results = {it["metric"]: {**it, "stale": False} for it in decoded}
+    else:
+        results = latest_results(sample)
+    return {"sample": {k: v for k, v in sample.items() if k != "path"}, "results": results,
+            "metrics": numeric_metrics(results), "job": job, "protocol": PROTOCOL}
+
+
+METRIC_LABELS = {"basic": "基础检查", "clap": "提示词匹配", "songeval": "歌曲美学", "translation": "本地翻译",
+                 "clap_score": "CLAP 相似度", "silence_ratio": "静音比例", "near_full_scale_ratio": "近满幅比例",
+                 "loudness_lufs": "综合响度 LUFS", "duration": "时长（秒）", "Coherence": "整体连贯性",
+                 "Musicality": "音乐性", "Memorability": "记忆度", "Clarity": "结构清晰度", "Naturalness": "人声自然度"}
+
+
+def song_html(record):
+    esc = html.escape
+    s, results = record["sample"], record["results"]
+    text = [f'<section><h2>{esc(s["filename"])}</h2>',
+            f'<p>模型：{esc(s["model_id"])} / {esc(s["model_version"])} · 提示词：{esc(s["prompt_id"])}</p>',
+            f'<h3>原始提示词</h3><p class="prompt">{esc(s["prompt"] or "未提供")}</p>']
+    clap = results.get("clap", {})
+    scoring_text = (clap.get("result") or {}).get("value") or {}
+    english = scoring_text.get("text_used") or s.get("prompt_en")
+    if english:
+        text.append(f'<h3>英文评分文本</h3><p class="prompt">{esc(english)}</p>')
+    if record.get("job"):
+        text.append(f'<p>评估任务：{esc(record["job"]["id"])}（使用该任务的输入快照）</p>')
+    text.append('<table><tr><th>指标</th><th>结果</th></tr>')
+    for name, value in record["metrics"].items():
+        label = METRIC_LABELS["clap_score" if name == "clap" else name]
+        display = f'{value * 100:.2f}%' if name.endswith("ratio") else f'{value:.4f}'
+        text.append(f'<tr><td>{esc(label)}</td><td>{display}</td></tr>')
+    text.append('</table><h3>评估状态</h3><table><tr><th>评估器</th><th>状态 / 原因</th></tr>')
+    states = {"success": "成功", "failed": "失败", "skipped": "未计算", "cancelled": "已取消", "queued": "排队中", "running": "运行中"}
+    for metric in ("basic", "clap", "songeval", "translation"):
+        it = results.get(metric)
+        if not it and metric == "translation":
+            continue
+        status = ("需要重算" if it.get("stale") else states[it["status"]]) if it else ("本任务未选择" if record.get("job") else "尚未评估")
+        reason = esc((it or {}).get("reason") or "")
+        text.append(f'<tr><td>{METRIC_LABELS[metric]}</td><td>{status} {reason}</td></tr>')
+    text.append('</table></section>')
+    return ''.join(text)
+
+
+def export_sample_html(record):
+    payload = html.escape(json.dumps(record, ensure_ascii=False, indent=2))
+    return ('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>单曲评估报告</title>'
+            '<style>body{font:16px/1.7 system-ui;max-width:1000px;margin:40px auto;padding:20px;color:#243d34}'
+            'table{border-collapse:collapse;width:100%}td,th{padding:10px;text-align:left;border-bottom:1px solid #ddd}'
+            '.prompt,pre{white-space:pre-wrap;overflow-wrap:anywhere}h1{color:#276b58}</style>'
+            '<h1>单曲评估报告</h1>' + song_html(record) + '<details><summary>完整结果与溯源</summary><pre>' + payload + '</pre></details></html>')
+
+
 def report(samples):
     records, groups = [], defaultdict(list)
     for s in samples:
@@ -132,6 +196,10 @@ def export_csv(data):
 def export_html(data):
     escape = html.escape
     body = []
+    if data["records"]:
+        body.append('<h2>单曲评估结果</h2>')
+        body.extend(song_html(r) for r in data["records"])
+        body.append('<h2>模型汇总</h2>')
     for g in data["groups"]:
         body.append(f"<h2>{escape(' / '.join(g['group']))}</h2><p>{g['count']} 首 · {g['prompt_count']} 个提示词</p><table><tr><th>指标</th><th>提示词等权均值</th><th>P10–P90</th></tr>")
         for k, v in g["metrics"].items():

@@ -1,0 +1,22 @@
+.job-song-reports{margin-top:20px;padding:18px;background:#f6f9f2;border:1px solid var(--border);border-radius:7px}
+.job-song-reports .section-heading{margin-bottom:12px}
+.job-song-row{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:13px 0;border-top:1px solid var(--border)}
+.job-song-row>div{min-width:0}
+.job-song-row strong{display:block;font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.job-song-row small{display:block;margin-top:6px;color:#65745d;font-size:11px}
+.job-song-row button{flex-shrink:0;font-size:12px}
+.song-report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.song-report-card{padding:22px}
+.song-report-card h2{font-size:16px;line-height:1.5;margin:0 0 6px;overflow-wrap:anywhere}
+.song-report-card .detail-title{margin-top:0;align-items:flex-start}
+.song-report-card .detail-title>div{min-width:0}
+.song-report-card .detail-title .muted{font-size:12px}
+.song-prompt{font-size:13px;line-height:1.8;color:#53674c;overflow-wrap:anywhere;max-height:100px;overflow:auto}
+.song-report-card .mini-metrics{margin:22px 0}
+.song-report-card .mini-metrics span{font-size:11px}
+.song-report-card .table-footer{padding:16px 0 0;background:transparent;margin-top:20px;flex-wrap:wrap}
+.report-metric-states{display:flex;flex-wrap:wrap;gap:10px 16px;font-size:12px;color:#526548;line-height:2}
+.report-context{font-size:12px;line-height:1.8;color:#586d4c;overflow-wrap:anywhere}
+.report-toolbar>select[aria-label="报告所属任务"]{max-width:440px}
+@media(max-width:1100px){.song-report-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.job-song-reports{padding:12px}.job-song-row{flex-direction:column;align-items:flex-start}.song-report-card{padding:16px}.job-song-reports .section-heading{flex-wrap:wrap}}

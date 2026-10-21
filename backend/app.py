@@ -19,7 +19,7 @@ from . import db
 from .audio import ffmpeg, waveform
 from .config import DATA, ROOT, MODELS, PROTOCOL, settings
 from .jobs import create_job, job_view, runner
-from .reports import latest_results, report, export_csv, export_html
+from .reports import latest_results, report, export_csv, export_html, sample_report, export_sample_html
 
 
 @asynccontextmanager
@@ -177,6 +177,22 @@ async def upload(files: list[UploadFile] = File(...), metadata: str = Form("{}")
             path.unlink(missing_ok=True)
         raise HTTPException(422, str(e))
     return {"sample_ids": [s["id"] for s in created]}
+
+
+@app.get("/api/samples/{sid}/report")
+def get_sample_report(sid: str, job_id: str | None = None):
+    try:
+        return sample_report(sample_or_404(sid), job_id)
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+
+
+@app.get("/api/samples/{sid}/report/{kind}")
+def download_sample_report(sid: str, kind: Literal["html", "json"], job_id: str | None = None):
+    record = get_sample_report(sid, job_id)
+    content = export_sample_html(record) if kind == "html" else json.dumps(record, ensure_ascii=False, indent=2)
+    return Response(content, media_type="text/html" if kind == "html" else "application/json",
+                    headers={"Content-Disposition": f'attachment; filename="song-report-{sid}.{kind}"'})
 
 
 @app.patch("/api/samples/{sid}")

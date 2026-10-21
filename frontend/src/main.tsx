@@ -3,8 +3,9 @@ import {createRoot} from 'react-dom/client';
 import {AudioLines,ArrowRight,ArrowUpRight,BarChart3,Check,CheckCircle2,ChevronLeft,Download,Files,FlaskConical,Headphones,HelpCircle,Layers3,Loader2,Play,Plus,RefreshCw,Settings2,ShieldCheck,SlidersHorizontal,Upload,X} from 'lucide-react';
 import {api,post,fmt,labels,states,valueOf,type Sample,type Job,type MetricItem} from './api';
 import './style.css';
+import './song-reports.css';
 
-type Tab='library'|'compare'|'jobs'|'report'|'settings';
+type Tab='library'|'compare'|'jobs'|'songs'|'report'|'settings';
 function Status({status}:{status:string}){return <span className={'status '+status}>{status==='running'&&<Loader2 size={12} className="spin"/>}{states[status]||status}</span>}
 function Empty({title,children}:{title:string;children?:React.ReactNode}){return <div className="empty"><AudioLines size={32}/><h3>{title}</h3><div>{children}</div></div>}
 function Help({children}:{children:React.ReactNode}){return <p className="help"><HelpCircle size={14}/><span>{children}</span></p>}
@@ -15,6 +16,7 @@ function Dialog({title,close,children}:{title:string;close:()=>void;children:Rea
 }
 
 function App(){
+  const [reportJob,setReportJob]=useState(''),[reportOpen,setReportOpen]=useState<{sampleId:string;jobId?:string}|null>(null);
   const [tab,setTab]=useState<Tab>('library'),[samples,setSamples]=useState<Sample[]>([]),[jobs,setJobs]=useState<Job[]>([]),[selected,setSelected]=useState<string[]>([]),[error,setError]=useState(''),[busy,setBusy]=useState(false),[importing,setImporting]=useState(false),[evaluating,setEvaluating]=useState(false),[detail,setDetail]=useState<Sample|null>(null),[filter,setFilter]=useState(''),[type,setType]=useState(''),[model,setModel]=useState(''),[tag,setTag]=useState('');
   const perform=async(fn:()=>Promise<unknown>)=>{setError('');setBusy(true);try{await fn()}catch(e){setError(String((e as Error).message))}finally{setBusy(false)}};
   const refresh=async()=>{const [ss,jj]=await Promise.all([api<Sample[]>('/samples'),api<Job[]>('/jobs')]);setSamples(ss);setJobs(jj)};
@@ -22,9 +24,9 @@ function App(){
   const visible=samples.filter(s=>(!type||s.audio_type===type)&&(!model||s.model_id===model)&&(!tag||s.tags.split(',').map(x=>x.trim()).includes(tag))&&(!filter||[s.filename,s.prompt,s.model_id,s.model_version,s.prompt_id].join(' ').toLowerCase().includes(filter.toLowerCase())));
   const chosen=samples.filter(s=>selected.includes(s.id));
   const active=jobs.filter(j=>['running','queued'].includes(j.status));
-  const nav:[Tab,React.ReactNode,string][]=[['library',<Files size={19}/>,'音频资料库'],['compare',<Headphones size={19}/>,'作品对比'],['report',<BarChart3 size={19}/>,'模型报告'],['jobs',<Layers3 size={19}/>,'评估任务']];
+  const nav:[Tab,React.ReactNode,string][]=[['library',<Files size={19}/>,'音频资料库'],['compare',<Headphones size={19}/>,'作品对比'],['songs',<Files size={19}/>,'单曲报告'],['report',<BarChart3 size={19}/>,'模型报告'],['jobs',<Layers3 size={19}/>,'评估任务']];
   return <div className="shell"><aside className="sidebar"><a href="#" className="brand" aria-label="Music Eval 首页" onClick={e=>{e.preventDefault();setTab('library')}}><span className="brand-icon"><AudioLines size={25}/></span><div>Music Eval<small>音乐评估工作台</small></div></a><div className="workspace-label">WORKSPACE <span>本地研究</span></div><nav>{nav.map(([id,icon,name])=><button key={id} className={tab===id?'nav-item active':'nav-item'} onClick={()=>setTab(id)}>{icon}{name}{id==='jobs'&&active.length>0&&<b>{active.length}</b>}</button>)}</nav><div className="sidebar-note"><span className="small-label">评估原则</span><p>按提示词分组，<br/>比较模型生成结果。</p><span>分项指标 · 配对比较 · 可复现</span></div><div className="sidebar-bottom"><button className={'nav-item '+(tab==='settings'?'active':'')} onClick={()=>setTab('settings')}><Settings2 size={19}/>运行设置</button><div className="local-indicator"><span/>CPU ONLY <small>音频保留在本机</small></div></div></aside>
-  <main><header className="topbar"><span>工作空间 <span className="slash">/</span> {({library:'音频资料库',compare:'作品对比',jobs:'评估任务',report:'模型报告',settings:'运行设置'})[tab]}</span><div><span className="research"><FlaskConical size={13}/>非商业研究版</span><button className="icon-button" aria-label="刷新数据" onClick={()=>perform(refresh)}><RefreshCw size={16} className={busy?'spin':''}/></button></div></header>
+  <main><header className="topbar"><span>工作空间 <span className="slash">/</span> {({library:'音频资料库',compare:'作品对比',jobs:'评估任务',songs:'单曲报告',report:'模型报告',settings:'运行设置'})[tab]}</span><div><span className="research"><FlaskConical size={13}/>非商业研究版</span><button className="icon-button" aria-label="刷新数据" onClick={()=>perform(refresh)}><RefreshCw size={16} className={busy?'spin':''}/></button></div></header>
   <div className="content">{error&&<div className="error-banner" role="alert"><span>{error}</span><button onClick={()=>setError('')} aria-label="关闭错误"><X size={16}/></button></div>}
   {tab==='library'&&<><div className="page-heading"><div><span className="eyebrow">本地 CPU 评估</span><h1>音乐生成评估</h1><p>导入音频和提示词，评估并比较生成结果。</p></div><button className="primary" onClick={()=>setImporting(true)}><Plus size={17}/>导入音频</button></div>
   <section className="stats-grid"><Stat title="音频样本" value={samples.filter(s=>s.role==='generated').length} unit="首" detail="原始音频本地存储" icon={<AudioLines size={19}/>}/><Stat title="候选模型" value={new Set(samples.filter(s=>s.role==='generated').map(s=>s.model_id+' / '+s.model_version)).size} unit="个版本" detail="按相同提示词分组比较" icon={<Layers3 size={19}/>}/><Stat title="测试提示词" value={new Set(samples.filter(s=>s.role==='generated').map(s=>s.prompt_id)).size} unit="组" detail="以 prompt_id 关联作品" icon={<Files size={19}/>}/><Stat title="已完成基础检查" value={samples.filter(s=>valueOf(s,'basic')).length} unit="首" detail={active.length?`${active.length} 个评估任务进行中`:'评估任务已就绪'} icon={<ShieldCheck size={19}/>}/></section>
@@ -34,12 +36,14 @@ function App(){
   <div className="table-footer"><span>{selected.length?`已选择 ${selected.length} 首作品`:'支持 WAV、FLAC、MP3 · 单文件最大 512MB'}</span><div className="actions"><button disabled={chosen.filter(s=>s.role==='generated').length<2} onClick={()=>setTab('compare')}><Headphones size={15}/>对比作品</button><button className="primary" disabled={!selected.length} onClick={()=>setEvaluating(true)}>开始评估<ArrowRight size={15}/></button></div></div></div>
   <div className="method-note"><ShieldCheck size={18}/><div><strong>指标说明</strong><p>CLAP 衡量语义匹配，SongEval 预测歌曲美学，FAD 比较批次分布。不同指标分别呈现，不合成总分。</p></div><span className="mono">PROTOCOL v1.0</span></div></>}
   {tab==='compare'&&<Compare samples={samples} selected={selected} setSelected={setSelected} perform={perform}/>}
-  {tab==='jobs'&&<><PageTitle title="评估任务" subtitle="逐项运行、持久保存。中断后可恢复，失败项可单独重试。"/><div className="section-heading"><span>{jobs.length} 个最近任务</span><button className="primary" disabled={!selected.length} onClick={()=>setEvaluating(true)}><Play size={15}/>新建评估</button></div>{!jobs.length?<Empty title="还没有评估任务">在音频资料库选择作品后开始评估。</Empty>:jobs.map(j=><div className="panel job-card" key={j.id}><div className="job-head"><div><h3>评估任务 <span className="mono">{j.id.slice(0,8)}</span></h3><small>{new Date(j.created*1000).toLocaleString()} · {j.config.metrics.map((m:string)=>labels[m]).join(' / ')}</small></div><Status status={j.status}/></div><div className="progress"><i style={{width:`${j.total?j.done/j.total*100:0}%`}}/></div><div className="job-head"><span>{j.done} / {j.total} 项完成</span><div className="actions">{['queued','running'].includes(j.status)?<button onClick={()=>perform(async()=>{await post(`/jobs/${j.id}/cancel`);await refresh()})}>取消任务</button>:<button onClick={()=>perform(async()=>{await post(`/jobs/${j.id}/retry`);await refresh()})}><RefreshCw size={14}/>重试未完成项</button>}</div></div><div className="job-items">{j.items.map(it=><div className="job-item" key={it.id}><span><strong>{labels[it.metric]}</strong><small>{it.snapshot.sample.filename}</small></span><Status status={it.status}/><span className="mono">{it.elapsed!=null?`${fmt(it.elapsed,1)} s · ${fmt(it.peak_mb,0)} MB`:'—'}</span>{it.result?.cache_hit&&<span className="type-pill">缓存</span>}{it.reason&&<p className="item-reason">{it.reason}</p>}</div>)}</div></div>)}</>}
+  {tab==='jobs'&&<><PageTitle title="评估任务" subtitle="逐项运行、持久保存。中断后可恢复，失败项可单独重试。"/><div className="section-heading"><span>{jobs.length} 个最近任务</span><button className="primary" disabled={!selected.length} onClick={()=>setEvaluating(true)}><Play size={15}/>新建评估</button></div>{!jobs.length?<Empty title="还没有评估任务">在音频资料库选择作品后开始评估。</Empty>:jobs.map(j=><div className="panel job-card" key={j.id}><div className="job-head"><div><h3>评估任务 <span className="mono">{j.id.slice(0,8)}</span></h3><small>{new Date(j.created*1000).toLocaleString()} · {j.config.metrics.map((m:string)=>labels[m]).join(' / ')}</small></div><Status status={j.status}/></div><div className="progress"><i style={{width:`${j.total?j.done/j.total*100:0}%`}}/></div><div className="job-head"><span>{j.done} / {j.total} 项完成</span><div className="actions">{['queued','running'].includes(j.status)?<button onClick={()=>perform(async()=>{await post(`/jobs/${j.id}/cancel`);await refresh()})}>取消任务</button>:<button onClick={()=>perform(async()=>{await post(`/jobs/${j.id}/retry`);await refresh()})}><RefreshCw size={14}/>重试未完成项</button>}</div></div>{jobSongs(j).length>0&&<div className="job-song-reports"><div className="section-heading"><h3>单曲评估报告</h3><button onClick={()=>{setReportJob(j.id);setTab('songs')}}>查看全部 {jobSongs(j).length} 首</button></div>{jobSongs(j).map(song=><div className="job-song-row" key={song.id}><div><strong>{song.filename}</strong><small>{Object.values(song.results).filter(it=>it.status==='success').length} / {Object.keys(song.results).length} 项成功</small></div><button className="primary" onClick={()=>setReportOpen({sampleId:song.id,jobId:j.id})}>查看单曲报告<ArrowUpRight size={14}/></button></div>)}</div>}<div className="job-items">{j.items.map(it=><div className="job-item" key={it.id}><span><strong>{labels[it.metric]}</strong><small>{it.snapshot.sample.filename}</small></span><Status status={it.status}/><span className="mono">{it.elapsed!=null?`${fmt(it.elapsed,1)} s · ${fmt(it.peak_mb,0)} MB`:'—'}</span>{it.result?.cache_hit&&<span className="type-pill">缓存</span>}{it.reason&&<p className="item-reason">{it.reason}</p>}</div>)}</div></div>)}</>}
+  {tab==='songs'&&<SongReports samples={samples} jobs={jobs} jobId={reportJob} setJobId={setReportJob} onOpen={(sampleId,jobId)=>setReportOpen({sampleId,jobId})}/>}
   {tab==='report'&&<Report samples={samples} perform={perform}/>}
   {tab==='settings'&&<Settings perform={perform}/>}
   <footer>Music Eval <span>本地 CPU 评估 · 原始音频不上传云端</span><a href="/docs" target="_blank" rel="noreferrer">API 文档 <ArrowUpRight size={12}/></a></footer></div></main>
   {importing&&<ImportDialog close={()=>setImporting(false)} done={refresh} perform={perform} busy={busy}/>}
   {evaluating&&<EvalDialog samples={chosen} allSamples={samples} close={()=>setEvaluating(false)} start={body=>perform(async()=>{await post('/jobs',body);setEvaluating(false);setTab('jobs');await refresh()})} busy={busy}/>}
+  {reportOpen&&<SongReportDialog sampleId={reportOpen.sampleId} jobId={reportOpen.jobId} refreshKey={jobs.map(j=>j.updated).join(',')} close={()=>setReportOpen(null)}/>}
   {detail&&<Detail sample={samples.find(s=>s.id===detail.id)||detail} close={()=>setDetail(null)} perform={perform} refresh={refresh}/>}
   </div>
 }
@@ -53,7 +57,7 @@ function EvalDialog({samples,allSamples,close,start,busy}:{samples:Sample[];allS
 
 function AudioPlayer({src,onPosition,seek,label,switchPosition}:{src:string;onPosition?:(n:number)=>void;seek?:number;label:string;switchPosition?:number}){const ref=useRef<HTMLAudioElement>(null);useEffect(()=>{if(ref.current&&seek!=null&&Math.abs(ref.current.currentTime-seek)>.5)ref.current.currentTime=seek},[seek]);return <audio aria-label={label} ref={ref} controls preload="metadata" src={src} onTimeUpdate={e=>onPosition?.(e.currentTarget.currentTime)} onPlay={e=>{const current=e.currentTarget;if(switchPosition!=null&&Math.abs(current.currentTime-switchPosition)>.5){current.currentTime=Math.min(switchPosition,Number.isFinite(current.duration)?current.duration:switchPosition)}document.querySelectorAll('audio').forEach(a=>{if(a!==current)a.pause()})}}/>}
 function Waveform({id}:{id:string}){const [data,setData]=useState<{duration:number;peaks:number[]}|null>(null),[err,setErr]=useState('');useEffect(()=>{let live=true;api(`/samples/${id}/waveform`).then(d=>{if(live)setData(d)}).catch(e=>{if(live)setErr(e.message)});return()=>{live=false}},[id]);if(err)return <p className="muted">波形不可用：{err}</p>;if(!data)return <div className="wave-loading">载入波形…</div>;return <div className="waveform"><svg viewBox="0 0 900 90" role="img" aria-label={`音频振幅波形，${fmt(data.duration,1)}秒`} preserveAspectRatio="none">{data.peaks.map((p,i)=><line key={i} x1={i*900/data.peaks.length} x2={i*900/data.peaks.length} y1={45-Math.min(p,1)*40} y2={45+Math.min(p,1)*40}/>)}</svg><div><span>0:00</span><span>{fmt(data.duration,1)} s</span></div></div>}
-function ItemResult({item}:{item?:MetricItem}){if(!item)return <p className="muted">尚未评估</p>;if(item.stale)return <><Status status="stale"/><p className="muted">输入已变更，请重新评估。</p></>;if(item.status!=='success')return <><Status status={item.status}/><p className="muted">{item.reason}</p></>;const v=item.result.value;return <>{item.metric==='basic'?<><div className="data-grid">{[['时长',`${fmt(v.duration,1)} s`],['采样率',`${v.sample_rate} Hz`],['声道',v.channels],['静音比例',`${fmt(v.silence_ratio*100,2)}%`],['近满幅比例',`${fmt(v.near_full_scale_ratio*100,3)}%`],['综合响度',`${fmt(v.loudness_lufs,1)} LUFS`],['异常数值',v.invalid_values]].map(([a,b])=><div key={a}><span>{a}</span><strong>{b}</strong></div>)}</div>{v.loudness_reason&&<p className="muted">{v.loudness_reason}</p>}<details><summary>异常时间位置</summary><pre>{JSON.stringify({静音:v.silence_intervals,近满幅:v.near_full_scale_intervals},null,2)}</pre></details></>:item.metric==='clap'?<><div className="big-score">{fmt(v.score)}<small>CLAP 余弦相似度</small></div><p className="used-text">{v.text_used}</p><div className="timeline" role="img" aria-label="全曲窗口语义匹配分数">{v.windows.map((w:any,i:number)=><div key={i} title={`${w.start}s – ${fmt(w.start+w.valid_seconds,1)}s：${fmt(w.score)}`} style={{height:`${Math.max(5,(w.score+1)/2*100)}%`,flex:w.valid_seconds}}/>)}</div><details><summary>窗口分数与有效时长</summary><div className="table-scroll"><table><thead><tr><th>起始秒</th><th>有效秒数</th><th>相似度</th></tr></thead><tbody>{v.windows.map((w:any,i:number)=><tr key={i}><td>{w.start}</td><td>{fmt(w.valid_seconds,2)}</td><td>{fmt(w.score)}</td></tr>)}</tbody></table></div></details><Help>CLAP 计算音频与评分文本的相似度。歌词、否定条件和具体段落请结合试听检查。</Help></>:item.metric==='songeval'?<><div className="score-list">{Object.entries(v.scores).map(([k,n])=><div key={k}><span>{labels[k]}</span><strong>{fmt(n as number|null)}</strong><div><i style={{width:`${n==null?0:Math.max(0,Math.min(100,Number(n)/5*100))}%`}}/></div></div>)}</div>{v.exploratory&&<Help>纯音乐结果仅供探索，人声自然度不适用。</Help>}</>:<pre>{JSON.stringify(v,null,2)}</pre>}<small className="result-meta">{item.result.cache_hit?'缓存命中':`${fmt(item.elapsed,1)} 秒 · 峰值 ${fmt(item.peak_mb,0)} MB`} · {item.result.protocol}</small></>}
+function ItemResult({item}:{item?:MetricItem}){if(!item)return <p className="muted">尚未评估</p>;if(item.stale)return <><Status status="stale"/><p className="muted">输入已变更，请重新评估。</p></>;if(item.status!=='success')return <><Status status={item.status}/><p className="muted">{item.reason}</p></>;const v=item.result.value;return <>{item.metric==='basic'?<><div className="data-grid">{[['时长',`${fmt(v.duration,1)} s`],['采样率',`${v.sample_rate} Hz`],['声道',v.channels],['静音比例',`${fmt(v.silence_ratio*100,2)}%`],['近满幅比例',`${fmt(v.near_full_scale_ratio*100,3)}%`],['综合响度',`${fmt(v.loudness_lufs,1)} LUFS`],['异常数值',v.invalid_values]].map(([a,b])=><div key={a}><span>{a}</span><strong>{b}</strong></div>)}</div>{v.loudness_reason&&<p className="muted">{v.loudness_reason}</p>}<details><summary>异常时间位置</summary><pre>{JSON.stringify({静音:v.silence_intervals,近满幅:v.near_full_scale_intervals},null,2)}</pre></details></>:item.metric==='clap'?<><div className="big-score">{fmt(v.score)}<small>CLAP 余弦相似度</small></div><details><summary>本项使用的评分文本</summary><p className="used-text">{v.text_used}</p></details><div className="timeline" role="img" aria-label="全曲窗口语义匹配分数">{v.windows.map((w:any,i:number)=><div key={i} title={`${w.start}s – ${fmt(w.start+w.valid_seconds,1)}s：${fmt(w.score)}`} style={{height:`${Math.max(5,(w.score+1)/2*100)}%`,flex:w.valid_seconds}}/>)}</div><details><summary>窗口分数与有效时长</summary><div className="table-scroll"><table><thead><tr><th>起始秒</th><th>有效秒数</th><th>相似度</th></tr></thead><tbody>{v.windows.map((w:any,i:number)=><tr key={i}><td>{w.start}</td><td>{fmt(w.valid_seconds,2)}</td><td>{fmt(w.score)}</td></tr>)}</tbody></table></div></details><Help>CLAP 计算音频与评分文本的相似度。歌词、否定条件和具体段落请结合试听检查。</Help></>:item.metric==='songeval'?<><div className="score-list">{Object.entries(v.scores).map(([k,n])=><div key={k}><span>{labels[k]}</span><strong>{fmt(n as number|null)}</strong><div><i style={{width:`${n==null?0:Math.max(0,Math.min(100,Number(n)/5*100))}%`}}/></div></div>)}</div>{v.exploratory&&<Help>纯音乐结果仅供探索，人声自然度不适用。</Help>}</>:<pre>{JSON.stringify(v,null,2)}</pre>}<small className="result-meta">{item.result.cache_hit?'缓存命中':`${fmt(item.elapsed,1)} 秒 · 峰值 ${fmt(item.peak_mb,0)} MB`} · {item.result.protocol}</small></>}
 function Detail({sample:s,close,perform,refresh}:{sample:Sample;close:()=>void;perform:(fn:()=>Promise<unknown>)=>Promise<void>;refresh:()=>Promise<void>}){const [editing,setEditing]=useState(false),[meta,setMeta]=useState<any>(s);return <Dialog title="作品详情" close={close}><div className="detail-title"><span className="track-icon"><AudioLines size={22}/></span><div><h3>{s.filename}</h3><span className="muted">{s.model_id} / {s.model_version} · {s.prompt_id}</span></div></div><Waveform id={s.id}/><AudioPlayer src={`/api/samples/${s.id}/audio`} label={'播放 '+s.filename}/><div className="section-heading"><h3>提示词与元数据</h3><button onClick={()=>{setMeta(s);setEditing(!editing)}}>{editing?'收起编辑':'编辑信息'}</button></div>{editing?<form onSubmit={e=>{e.preventDefault();perform(async()=>{await api(`/samples/${s.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(meta)});await refresh();setEditing(false)})}}><MetaFields meta={meta} setMeta={setMeta}/><button className="primary">保存修改</button></form>:<><p className="prompt-text">{s.prompt||'未提供提示词'}</p><p className="used-text">{s.prompt_en||'尚未保存英文译文；CLAP 任务可自动本地翻译。'}</p><button onClick={()=>perform(async()=>{await post('/jobs',{sample_ids:[s.id],metrics:['translation']});await refresh()})}>本地生成英文译文</button></>}{['basic','clap','songeval'].map(m=><section className="detail-section" key={m}><h3>{labels[m]}</h3><ItemResult item={s.results[m]}/></section>)}<details><summary>输入哈希与评估溯源</summary><pre>{JSON.stringify({sha256:s.sha256,results:s.results},null,2)}</pre></details></Dialog>}
 
 function Compare({samples,selected,setSelected,perform}:{samples:Sample[];selected:string[];setSelected:(ids:string[])=>void;perform:(fn:()=>Promise<unknown>)=>Promise<void>}){
@@ -67,5 +71,102 @@ function Compare({samples,selected,setSelected,perform}:{samples:Sample[];select
 
 function Report({samples,perform}:{samples:Sample[];perform:(fn:()=>Promise<unknown>)=>Promise<void>}){const [model,setModel]=useState(''),[version,setVersion]=useState(''),[type,setType]=useState(''),[tag,setTag]=useState(''),[data,setData]=useState<any>(null),[votes,setVotes]=useState<any>({});const query=new URLSearchParams({model,version,audio_type:type,tag}).toString();const load=async()=>{setData(await api('/report?'+query));setVotes(await api('/votes'))};useEffect(()=>{perform(load)},[model,version,type,tag,samples]);return <><PageTitle title="模型对比报告" subtitle="分数按提示词等权汇总，可查看分布和配对差异。"/><div className="panel report-toolbar"><select aria-label="报告模型筛选" value={model} onChange={e=>setModel(e.target.value)}><option value="">全部模型</option>{Array.from(new Set(samples.map(s=>s.model_id))).map(m=><option key={m}>{m}</option>)}</select><select aria-label="报告类型筛选" value={type} onChange={e=>setType(e.target.value)}><option value="">全部音乐类型</option><option value="song">人声歌曲</option><option value="instrumental">纯音乐</option></select><input aria-label="报告版本筛选" placeholder="按模型版本筛选" value={version} onChange={e=>setVersion(e.target.value)}/><input aria-label="报告标签筛选" placeholder="按标签筛选" value={tag} onChange={e=>setTag(e.target.value)}/><div className="export-actions">{['csv','json','html','bundle'].map(k=><a className="button" key={k} href={`/api/export/${k}?${query}`}><Download size={14}/>{k==='bundle'?'含音频 ZIP':k.toUpperCase()}</a>)}</div></div>{!data?.groups.length?<Empty title="还没有模型报告">导入并评估生成音频后，这里会出现分项结果。</Empty>:<><div className="report-groups">{data.groups.map((g:any)=><section className="panel report-group" key={g.group.join('/')}><div className="section-heading"><h2>{g.group[0]} <span className="type-pill">{g.group[1]||'无版本'}</span></h2><span>{g.group[2]==='song'?'人声歌曲':'纯音乐'}</span></div><p className="muted">{g.count} 首样本 · {g.prompt_count} 个提示词</p><div className="table-scroll"><table><thead><tr><th>指标</th><th>等权均值</th><th>P10–P90</th><th>提示词数</th></tr></thead><tbody>{Object.entries(g.metrics).map(([k,v]:[string,any])=><tr key={k}><td>{labels[k]||k}</td><td className="mono">{fmt(v.mean)}</td><td className="mono">{fmt(v.p10)} – {fmt(v.p90)}</td><td>{v.prompt_count}</td></tr>)}</tbody></table></div><details><summary>成功率、状态与分布</summary>{Object.entries(g.statuses).map(([k,v]:[string,any])=><p key={k}>{labels[k]}：成功 {v.success||0} / {g.count}（{fmt((v.success||0)/g.count*100,1)}%） · {JSON.stringify(v)}</p>)}{Object.entries(g.metrics).map(([k,v]:[string,any])=><p key={k}>{labels[k]}：{v.values.map((n:number)=>fmt(n)).join(' · ')}</p>)}</details></section>)}</div><section className="panel report-group"><h2>共同提示词 · 配对差异</h2><Help>差值为 A − B。95% 区间按提示词重采样 2,000 次；跨音乐类型不配对，缺少结果的提示词不补零。</Help>{!data.pairs.length?<p className="muted">尚无可配对的共同提示词指标。</p>:<div className="table-scroll"><table><thead><tr><th>A / B</th><th>指标</th><th>共同提示词</th><th>均值差</th><th>95% 区间</th></tr></thead><tbody>{data.pairs.map((p:any,i:number)=><tr key={i}><td>{p.a.slice(0,2).join('/')}<br/><span className="muted">{p.b.slice(0,2).join('/')}</span><small className="cell-sub">{p.warning}</small></td><td>{labels[p.metric]}</td><td>{p.shared_prompts}</td><td>{fmt(p.delta_a_minus_b)}</td><td>{p.ci95?p.ci95.map((x:number)=>fmt(x)).join(' ~ '):'样本不足'}</td></tr>)}</tbody></table></div>}</section><section className="panel report-group"><h2>批次 FAD</h2>{!data.fad.length?<p className="muted">未计算。需要真实音乐参考集与 FAD 任务。</p>:data.fad.map((it:any)=><div key={it.id}><h3>{it.snapshot.group.join(' / ')}</h3><ItemResult item={it}/></div>)}</section><section className="panel report-group"><h2>美学维度相关性</h2>{data.correlations.length?data.correlations.map((c:any)=><p key={c.a+c.b}>{labels[c.a]} × {labels[c.b]}：Pearson {fmt(c.pearson)}，n={c.n}</p>):<p className="muted">至少需要三首具有变化的有效美学结果。</p>}</section></>}<section className="panel report-group"><h2>可选盲听 · 人工偏好</h2><Help>与自动指标独立。胜率为获胜 /（获胜 + 失败），平局与跳过单列；这是本机投票记录。</Help>{!Object.keys(votes).length?<p className="muted">尚无已揭晓的盲听投票。</p>:Object.entries(votes).map(([k,v]:[string,any])=><p key={k}><strong>{k}</strong> · 胜率 {v.win_rate==null?'—':fmt(v.win_rate*100,1)+'%'} · {v.wins} 胜 / {v.losses} 负 / {v.ties} 平 / {v.skips} 跳过</p>)}</section></>}
 function Settings({perform}:{perform:(fn:()=>Promise<unknown>)=>Promise<void>}){const [data,setData]=useState<any>(null),[saved,setSaved]=useState(false);useEffect(()=>{perform(async()=>setData(await api('/settings')))},[]);if(!data)return <Empty title="读取运行设置…"/>;const opts=data.settings;return <><PageTitle title="运行设置" subtitle="固定模型与协议，让每次评估可复现。所有推理显式使用 CPU。"/><div className="panel settings-panel"><h2>CPU 与资源限制</h2><form onSubmit={e=>{e.preventDefault();perform(async()=>{setData(await api('/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(opts)}));setSaved(true)})}}><div className="form-grid">{[['threads','CPU 线程数'],['timeout_seconds','单项时间上限（秒）'],['memory_limit_gb','内存上限（GB）']].map(([k,l])=><label key={k}>{l}<input type="number" min={k==='memory_limit_gb'?.1:1} step={k==='memory_limit_gb'?.1:1} value={opts[k]} onChange={e=>{setSaved(false);setData({...data,settings:{...opts,[k]:Number(e.target.value)}})}}/></label>)}<label className="full">模型缓存目录<input value={opts.model_cache} onChange={e=>setData({...data,settings:{...opts,model_cache:e.target.value}})}/></label><label className="full">SongEval Python 路径<input value={opts.songeval_python} onChange={e=>setData({...data,settings:{...opts,songeval_python:e.target.value}})}/></label><label className="full">SongEval 源码目录<input value={opts.songeval_dir} onChange={e=>setData({...data,settings:{...opts,songeval_dir:e.target.value}})}/></label></div><label className="check-row"><input type="checkbox" checked={opts.offline} onChange={e=>setData({...data,settings:{...opts,offline:e.target.checked}})}/>离线模式：只从本地模型缓存加载</label><Help>设置只影响新任务及重试任务。单个推理子进程运行，超时或内存超限只结束当前指标。</Help><button className="primary">{saved?<Check size={15}/>:<Settings2 size={15}/>} {saved?'已保存':'保存设置'}</button></form></div><div className="panel settings-panel"><h2>模型与安装状态</h2><p>CLAP / 翻译依赖：{data.model_dependencies?'已安装':'未安装（仍可运行基础检查）'}</p><p>SongEval 独立环境：{data.songeval_installed?'已安装':'未安装'}</p><p>FAD 独立环境：{data.fad_installed?'已安装':'未安装'}</p><pre>./scripts/setup.ps1 -Models{`\n`}./scripts/setup-songeval.ps1{`\n`}./scripts/setup-fad.ps1</pre><details><summary>固定模型修订</summary><pre>{JSON.stringify(data.models,null,2)}</pre></details><Help>首次运行会下载相应权重。下载失败会记录真实错误，修复网络或指定缓存后可重试。</Help></div></>}
+
+function jobSongs(job: Job): Sample[] {
+  const songs = new Map<string, Sample>();
+  for (const item of job.items) {
+    if (item.metric === 'fad') continue;
+    const song = songs.get(item.sample_id) || {...item.snapshot.sample, results: {}};
+    song.results[item.metric] = {...item, stale: false};
+    songs.set(song.id, song);
+  }
+  return Array.from(songs.values());
+}
+
+function SongReports({samples,jobs,jobId,setJobId,onOpen}: {
+  samples: Sample[]; jobs: Job[]; jobId: string;
+  setJobId: (id: string) => void; onOpen: (sampleId: string, jobId?: string) => void;
+}) {
+  const [search,setSearch] = useState('');
+  const job = jobs.find(j=>j.id===jobId);
+  const songs = (job ? jobSongs(job) : samples.filter(s=>Object.keys(s.results).length>0))
+    .filter(s=>[s.filename,s.model_id,s.prompt_id].join(' ').toLowerCase().includes(search.toLowerCase()));
+  return <>
+    <PageTitle title="单曲评估报告" subtitle="逐首查看音频检查、提示词匹配和美学分数，下载完整报告。"/>
+    <div className="panel report-toolbar">
+      <select aria-label="报告所属任务" value={jobId} onChange={e=>setJobId(e.target.value)}>
+        <option value="">所有歌曲 · 最新评估结果</option>
+        {jobs.filter(j=>jobSongs(j).length>0).map(j=><option key={j.id} value={j.id}>
+          任务 {j.id.slice(0,8)} · {new Date(j.created*1000).toLocaleString()}
+        </option>)}
+      </select>
+      <input aria-label="搜索单曲报告" value={search} onChange={e=>setSearch(e.target.value)} placeholder="搜索歌曲、模型或提示词"/>
+      <span className="muted">{songs.length} 首歌曲</span>
+    </div>
+    {!songs.length ? <Empty title="还没有匹配的单曲报告">在资料库选择音频运行评估，结果会出现在这里。</Empty> :
+      <div className="song-report-grid">{songs.map(song=>{
+        const basic=valueOf(song,'basic'), clap=valueOf(song,'clap'), aesthetic=valueOf(song,'songeval');
+        const completed=Object.values(song.results).filter(it=>it.status==='success'&&!it.stale).length;
+        const params=jobId?'?job_id='+encodeURIComponent(jobId):'';
+        return <section key={song.id} className="panel song-report-card">
+          <div className="detail-title"><span className="track-icon"><AudioLines size={22}/></span><div>
+            <h2>{song.filename}</h2><span className="muted">{song.model_id} / {song.model_version||'未标版本'} · {song.prompt_id}</span>
+          </div></div>
+          <p className="song-prompt">{song.prompt||'未提供提示词'}</p>
+          <div className="mini-metrics">
+            <div><span>提示词匹配</span><strong>{fmt(clap?.score)}</strong></div>
+            <div><span>音乐性</span><strong>{fmt(aesthetic?.scores.Musicality)}</strong></div>
+            <div><span>时长</span><strong>{basic?fmt(basic.duration,1)+'s':'—'}</strong></div>
+          </div>
+          <div className="report-metric-states">{['basic','clap','songeval'].map(metric=>{
+            const it=song.results[metric];
+            return <span key={metric}>{labels[metric]} {it?<Status status={it.stale?'stale':it.status}/>:<span className="muted">{job?'本任务未选择':'尚未评估'}</span>}</span>;
+          })}</div>
+          <div className="table-footer"><span>{completed} 项成功</span><div className="actions">
+            <a className="button" href={`/api/samples/${song.id}/report/html${params}`}><Download size={14}/>HTML</a>
+            <button className="primary" onClick={()=>onOpen(song.id,jobId||undefined)}>查看完整报告<ArrowRight size={14}/></button>
+          </div></div>
+        </section>;
+      })}</div>}
+  </>;
+}
+
+function SongReportDialog({sampleId,jobId,refreshKey,close}: {
+  sampleId: string; jobId?: string; refreshKey: string; close: () => void;
+}) {
+  const [record,setRecord]=useState<any>(null),[error,setError]=useState('');
+  const params=jobId?'?job_id='+encodeURIComponent(jobId):'';
+  useEffect(()=>{
+    let live=true;
+    api(`/samples/${sampleId}/report${params}`).then(data=>{if(live){setRecord(data);setError('')}})
+      .catch(e=>{if(live)setError(e.message)});
+    return()=>{live=false};
+  },[sampleId,jobId,refreshKey]);
+  const song=record?.sample;
+  const text=record?.results.clap?.result?.value?.text_used || song?.prompt_en;
+  return <Dialog title="单曲评估报告" close={close}>
+    {error&&<p role="alert" className="error-banner">{error}</p>}
+    {!record&&!error&&<p role="status">正在读取报告…</p>}
+    {record&&<>
+      <div className="detail-title"><span className="track-icon"><AudioLines size={22}/></span><div>
+        <h3>{song.filename}</h3><span className="muted">{song.model_id} / {song.model_version||'未标版本'} · {song.prompt_id}</span>
+      </div></div>
+      <p className="report-context">{record.job?`评估任务 ${record.job.id.slice(0,8)} · ${new Date(record.job.created*1000).toLocaleString()} · 使用该次评估的输入快照`:'最新评估结果'}</p>
+      <div className="actions">
+        <a className="button" href={`/api/samples/${sampleId}/report/html${params}`}><Download size={14}/>下载 HTML 报告</a>
+        <a className="button" href={`/api/samples/${sampleId}/report/json${params}`}>下载 JSON</a>
+      </div>
+      <Waveform id={sampleId}/><AudioPlayer src={`/api/samples/${sampleId}/audio`} label={'试听 '+song.filename}/>
+      <details><summary>提示词与英文评分文本</summary>
+        <h3>原始提示词</h3><p className="prompt-text">{song.prompt||'未提供提示词'}</p>
+        {text&&<><h3>英文评分文本</h3><p className="used-text">{text}</p></>}
+      </details>
+      {['basic','clap','songeval'].map(metric=><section className="detail-section" key={metric}>
+        <h3>{labels[metric]}</h3>{record.results[metric]?<ItemResult item={record.results[metric]}/>:<p className="muted">{record.job?'本任务未选择该指标':'尚未评估'}</p>}
+      </section>)}
+      <details><summary>完整数据与评估溯源</summary><pre>{JSON.stringify(record,null,2)}</pre></details>
+    </>}
+  </Dialog>;
+}
 
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);

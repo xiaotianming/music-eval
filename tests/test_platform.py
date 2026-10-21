@@ -207,3 +207,43 @@ def test_one_runner_per_data_directory():
     # OS lock is released when the first runner exits.
     second.start()
     second.close()
+
+
+def test_single_song_report_preserves_task_snapshot(client):
+    sid = upload(client, prompt="Original piano prompt")
+    jid = client.post('/api/jobs', json={"sample_ids":[sid], "metrics":["basic"]}).json()["id"]
+    assert wait_job(client, jid)["items"][0]["status"] == "success"
+    s = db.one('SELECT * FROM samples WHERE id=?', (sid,))
+    insert_score(s, .75)
+    client.patch('/api/samples/'+sid, json={**s, "model_id":"Renamed", "prompt":"Edited prompt"})
+    current = client.get(f'/api/samples/{sid}/report').json()
+    frozen = client.get(f'/api/samples/{sid}/report?job_id={jid}').json()
+    assert current["sample"]["model_id"] == "Renamed"
+    assert current["results"]["clap"]["stale"]
+    assert frozen["sample"]["model_id"] == "A"
+    assert frozen["sample"]["prompt"] == "Original piano prompt"
+    assert set(frozen["results"]) == {"basic"}
+    assert frozen["metrics"]["duration"] == .6
+    assert frozen["job"]["id"] == jid
+    html = client.get(f'/api/samples/{sid}/report/html?job_id={jid}')
+    assert html.status_code == 200 and "attachment" in html.headers["content-disposition"]
+    assert "Original piano prompt" in html.text and "Edited prompt" not in html.text
+    assert "基础检查" in html.text and "本任务未选择" in html.text
+    json_export = client.get(f'/api/samples/{sid}/report/json?job_id={jid}').json()
+    assert json_export["sample"]["prompt"] == "Original piano prompt"
+    assert client.get(f'/api/samples/{sid}/report?job_id=missing').status_code == 404
+    assert client.get('/api/samples/missing/report').status_code == 404
+    other = upload(client, "B")
+    assert client.get(f'/api/samples/{other}/report?job_id={jid}').status_code == 404
+
+
+def test_single_song_html_shows_scores_and_escapes_prompt(client):
+    sid = upload(client, prompt='<script>alert("test")</script>')
+    s = db.one('SELECT * FROM samples WHERE id=?', (sid,))
+    insert_score(s, .42)
+    result = client.get(f'/api/samples/{sid}/report/html')
+    assert result.status_code == 200
+    assert "CLAP 相似度" in result.text and "0.4200" in result.text
+    assert '<script>' not in result.text and '&lt;script&gt;' in result.text
+    combined = client.get('/api/export/html')
+    assert "单曲评估结果" in combined.text and "中文 曲.wav" in combined.text
