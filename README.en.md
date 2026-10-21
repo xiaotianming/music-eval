@@ -8,9 +8,12 @@ A local CPU workbench for evaluating and comparing generated music. Import exist
 
 ## Quick start
 
-Install Git, [uv](https://docs.astral.sh/uv/) and Node.js 22 LTS, clone the actual repository, and open PowerShell at its root:
+Install Git, [uv](https://docs.astral.sh/uv/) and Node.js 22 LTS, then open PowerShell:
 
 ```powershell
+git clone https://github.com/xiaotianming/music-eval.git
+cd music-eval
+
 # Core app, audio diagnostics and comparison; no model download required
 ./scripts/setup.ps1
 ./scripts/start.ps1

@@ -20,7 +20,12 @@
 
 ## 启动（Windows PowerShell）
 
-克隆仓库后进入项目根目录。需要 Git、[uv](https://docs.astral.sh/uv/) 和 Node.js 22 LTS（见 `.node-version`）。安装脚本会创建 Python 3.11 环境，FFmpeg 由 `imageio-ffmpeg` 提供。
+需要 Git、[uv](https://docs.astral.sh/uv/) 和 Node.js 22 LTS（见 `.node-version`）。安装脚本会创建 Python 3.11 环境，FFmpeg 由 `imageio-ffmpeg` 提供。
+
+```powershell
+git clone https://github.com/xiaotianming/music-eval.git
+cd music-eval
+```
 
 ```powershell
 # 安装网页、基础评估及测试依赖
@@ -53,6 +58,7 @@
 | [安全说明](SECURITY.md) | 本地部署边界与漏洞报告方式 |
 | [第三方说明](THIRD_PARTY_NOTICES.md) | 代码、模型和音频的许可边界 |
 | [发布准备](docs/releasing.md) | 公开仓库与版本发布检查 |
+| [提交范围](docs/repository-content.md) | 源码、测试记录和本机运行数据的存放方式 |
 | [更新记录](CHANGELOG.md) | 尚未发布与已发布版本变化 |
 
 ## 使用流程

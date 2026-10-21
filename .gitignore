@@ -26,3 +26,18 @@ htmlcov/
 Thumbs.db
 *.pem
 *.key
+
+# Model checkpoints, embeddings and recordings stay outside source control.
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.npy
+*.npz
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.ogg
+*.zip

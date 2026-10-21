@@ -4,6 +4,8 @@ title: "Music Eval: Local CPU Music Evaluation Workbench"
 type: software
 version: 0.1.0
 license: MIT
+repository-code: "https://github.com/xiaotianming/music-eval"
+url: "https://github.com/xiaotianming/music-eval"
 authors:
   - name: "Music Eval contributors"
 abstract: "A local CPU workbench for evaluating and comparing generated music with explicit metric protocols and optional blind listening."
@@ -13,5 +15,3 @@ keywords:
   - CLAP
   - FAD
   - CPU
-# Before the first public release, add verified authors, repository-code and URL.
-# Do not invent contributor identities or a repository URL before publication.
