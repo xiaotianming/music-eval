@@ -111,7 +111,7 @@ def report(samples):
             seen.add(key)
     return {"protocol": PROTOCOL, "models": MODELS, "records": records, "groups": summary,
             "pairs": pairs, "correlations": correlations, "fad": fad,
-            "notes": ["CLAP 为语义相关程度，不是指令完成百分比。", "FAD 仅比较集合；不同协议分数不能混比。",
+            "notes": ["CLAP 报告音频与评分文本的余弦相似度。", "FAD 仅比较集合；不同协议分数不能混比。",
                       "先在提示词内汇总，再等权汇总提示词；不生成综合总分。"]}
 
 

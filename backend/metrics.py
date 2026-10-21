@@ -1,7 +1,6 @@
 """Model adapters. This module is imported only in the supervised CPU worker."""
 import hashlib
 import json
-import os
 import re
 from pathlib import Path
 import numpy as np

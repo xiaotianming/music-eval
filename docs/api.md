@@ -50,7 +50,7 @@
 
 可用指标为 `basic`、`clap`、`songeval`、`fad`、`translation`。只传 `translation` 可生成并保存可编辑译文。FAD 参考样本必须显式标为 `reference`。
 
-任务包含 `done`、`total` 和逐项 `items`。逐项状态为 `queued/running/success/failed/skipped/cancelled`；结果中 `stale=true` 表示当前输入已改变，旧分数不参与报告。`skipped`、失败及不适用的值不等于零分。
+任务包含 `done`、`total` 和逐项 `items`。逐项状态为 `queued/running/success/failed/skipped/cancelled`；结果中 `stale=true` 表示当前输入已改变，旧分数不参与报告。读取分数前先检查状态；跳过、失败和不适用的结果保留空值。
 
 取消是异步的，需继续查询直到状态结束。重试保留原任务输入快照，只重排失败、跳过、取消项；修改输入后应创建新任务。
 

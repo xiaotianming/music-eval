@@ -16,11 +16,11 @@
 - 逐项展示有效分数、失败原因、分布和配对差异，不生成未经校准的综合总分。
 - 模型修订固定、任务可恢复、缓存可追溯，结果可导出 CSV/JSON/HTML/音频 ZIP。
 
-本项目不生成音乐，不包含云端评估服务，也不以自动指标代替主观听感。
+使用时需要准备已有的生成音频和提示词。模型比较同时提供分项指标与试听。
 
 ## 启动（Windows PowerShell）
 
-先克隆实际仓库并进入项目根目录。需要已安装 Git、[uv](https://docs.astral.sh/uv/) 和 Node.js 22 LTS（见 `.node-version`）。安装脚本在项目内创建 Python 3.11 环境，不依赖系统 Python 版本；FFmpeg 使用 `imageio-ffmpeg` 自带的可执行文件。
+克隆仓库后进入项目根目录。需要 Git、[uv](https://docs.astral.sh/uv/) 和 Node.js 22 LTS（见 `.node-version`）。安装脚本会创建 Python 3.11 环境，FFmpeg 由 `imageio-ffmpeg` 提供。
 
 ```powershell
 # 安装网页、基础评估及测试依赖
@@ -38,7 +38,7 @@
 
 打开 <http://127.0.0.1:8000>，API 文档在 <http://127.0.0.1:8000/docs>。默认仅本机访问。首次模型下载需要网络；离线前先完成模型预下载和一次所需指标推理，随后在运行设置开启离线模式。FAD 也需要固定的 RoBERTa 配置和分词器，因此预下载命令中包含 `roberta`，但不会另下载 RoBERTa 模型权重。
 
-无需安装所有模型即可体验基础检查、对比和导出。建议先运行 `setup.ps1`、`start.ps1`，在网页点击“载入流程示例”；需要真实语义或美学评分时再安装相应模型环境。当前安装脚本按 Windows 编写，Linux 的核心测试 CI 不代表完整模型栈跨平台支持。
+先运行 `setup.ps1`、`start.ps1`，在网页点击“载入流程示例”即可试用基础检查、对比和导出。CLAP、翻译、SongEval 和 FAD 按需安装。完整模型栈的安装脚本适用于 Windows；Linux CI 覆盖基础后端测试。
 
 ## 文档导航
 
@@ -64,7 +64,7 @@
 5. 查看模型报告：按模型、版本、类型、标签筛选；查看分布、成功率、共同提示词差异和 95% bootstrap 区间。可选匿名 A/B 投票，投票后揭晓；这不是 ABX 听辨实验。
 6. 导出 CSV、JSON、HTML，或含配套音频的 ZIP。默认报告不嵌入音频。
 
-资料库的“载入流程示例”生成四个简单合成和弦，明确标为 **synthetic**；仅用于验证软件操作，不能据此得出生成模型质量结论。
+资料库的“载入流程示例”会创建四段标记为 **synthetic** 的合成和弦，方便检查导入、评估和对比流程。正式比较使用你导入的生成音频。
 
 ## 指标如何解释
 
@@ -111,7 +111,7 @@ npm run dev   # Vite 5173，代理到后端 8000
 ./.venv/Scripts/python.exe scripts/benchmark.py --metrics songeval --output docs/benchmark-songeval.json
 ```
 
-基准使用 30/180/300 秒合成和弦，测试性能而非音乐质量。每轮是新进程；CLAP 第二轮复用音频嵌入，因此与常驻模型热推理不同。结果不提供通用 CPU 速度保证。详细验收见 [docs/validation.md](docs/validation.md)。
+性能基准使用 30/180/300 秒合成和弦，每轮启动新进程；CLAP 第二轮复用音频嵌入。测量环境、耗时和内存见 [验收记录](docs/validation.md)。
 
 ## 方法与许可来源
 
@@ -121,4 +121,4 @@ npm run dev   # Vite 5173，代理到后端 8000
 - [FADtk](https://github.com/microsoft/fadtk)、[Adapting Frechet Audio Distance for Generative Music Evaluation](https://arxiv.org/abs/2311.01616)：参考集、嵌入及样本量决定解释范围。
 - [Benchmarking Music Generation Models and Metrics via Human Preference Studies](https://arxiv.org/abs/2506.19085)：自动指标应与人工偏好分开检验。
 
-本仓库原创代码采用 MIT。当前模型评估配置面向非商业研究；第三方代码、权重和参考音乐各保留其原有许可，不能由本项目的 MIT 授权推断模型或音乐素材的商业使用权。
+本仓库原创代码采用 MIT。第三方代码、权重和参考音乐按各自许可使用；当前 SongEval 集成面向非商业研究。具体说明见 [第三方许可](THIRD_PARTY_NOTICES.md)。

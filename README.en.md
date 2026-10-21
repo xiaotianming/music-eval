@@ -16,7 +16,7 @@ Install Git, [uv](https://docs.astral.sh/uv/) and Node.js 22 LTS, clone the actu
 ./scripts/start.ps1
 ```
 
-Open <http://127.0.0.1:8000>. Use the synthetic demo to try the workflow. The demo is a software fixture, not evidence about any generation model's quality.
+Open <http://127.0.0.1:8000> and load the synthetic demo to try the workflow. Import your generated tracks to compare models.
 
 To enable optional CPU models:
 
@@ -31,10 +31,10 @@ SongEval and FAD use separate environments. Do not install their dependency stac
 
 ## Metrics and limitations
 
-- **Audio diagnostics:** duration, silence, near-full-scale samples, loudness, channels and non-finite values. These are diagnostics, not a perceptual quality score.
+- **Audio diagnostics:** duration, silence, near-full-scale samples, loudness, channels and non-finite values. Use these measurements to locate audio problems.
 - **CLAP:** music-text similarity across contiguous 10-second windows. Chinese prompts are translated locally, with editable scoring text. Similarity is not a percentage of instructions satisfied.
 - **SongEval:** full-song aesthetic predictions. Instrumental evaluation is opt-in and exploratory; vocal naturalness is not applicable.
-- **FAD:** a batch-level distribution distance requiring an appropriate reference collection. It is not a per-track quality certificate or a universal pass/fail threshold.
+- **FAD:** distribution distance between generated and reference collections. Choose reference music that matches your evaluation task.
 - **Optional listening:** randomized anonymous A/B, ties and skips, reported separately from automatic metrics.
 
 Jobs persist in SQLite, retain input snapshots, and support cancellation, retries and recovery. Reports use prompt-level equal weighting and shared-prompt bootstrap comparisons. No uncalibrated composite score is produced.
@@ -49,7 +49,7 @@ npm ci
 npm run build
 ```
 
-CI is configured for Windows/Linux core tests and frontend builds; this is not a claim that the full optional model stack is supported on Linux. The project is currently a source-checkout application, not a published PyPI package. Frontend `private: true` prevents accidental npm publication; it does not change the source license.
+Run the app from a source checkout. CI covers Windows/Linux core tests and the frontend build; the full model installers target Windows. The frontend's `private: true` setting prevents accidental npm publication.
 
 ## Documentation
 
@@ -61,4 +61,4 @@ The detailed documentation is currently in Chinese:
 - [Contributing](CONTRIBUTING.md), [security policy](SECURITY.md), [release checklist](docs/releasing.md)
 - [Known dependency security status](docs/security-status.md)
 
-The frozen research model stack uses Transformers 4.51.3, which has known advisories and has not completed a major-version security migration. It is **not** advertised as audit-clean or safe for arbitrary untrusted checkpoints. The app is local-only and is not designed for public deployment.
+The research model stack pins Transformers 4.51.3, which has known security advisories. Use trusted model assets and keep the service on localhost. Migration work is tracked in the [security status](docs/security-status.md).

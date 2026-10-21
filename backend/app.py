@@ -3,7 +3,6 @@ import hashlib
 import io
 import json
 import random
-import re
 import subprocess
 import time
 import zipfile
