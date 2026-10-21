@@ -1,0 +1,34 @@
+[project]
+name = "music-eval"
+version = "0.1.0"
+description = "Local CPU music evaluation workbench"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["music-generation", "audio-evaluation", "clap", "fad", "cpu"]
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "fastapi==0.156.8", "uvicorn==0.34.2", "python-multipart==0.0.32",
+  "starlette>=1.3.1,<2",
+  "numpy==2.2.5", "scipy==1.15.3", "soundfile==0.13.1",
+  "pyloudnorm==0.1.1", "psutil==7.0.0", "imageio-ffmpeg==0.6.0",
+]
+
+[project.optional-dependencies]
+models = ["torch==2.7.0", "transformers==4.51.3", "sentencepiece==0.2.1", "sacremoses==0.1.1", "protobuf==5.29.6", "huggingface-hub==0.30.2"]
+dev = ["pytest==9.1.1", "httpx==0.28.1"]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.uv]
+package = false

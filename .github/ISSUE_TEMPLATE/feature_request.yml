@@ -1,0 +1,19 @@
+name: Feature request / 功能建议
+description: 讨论音乐评估需求或改进方案
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 希望解决的问题 / Problem
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议行为及成功标准 / Proposal and acceptance criteria
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 方法来源、CPU 成本与适用边界 / Evidence and limitations

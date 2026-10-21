@@ -1,0 +1,111 @@
+{
+  "status": "success",
+  "value": {
+    "score": 0.003194333226610707,
+    "text_used": "A popular song with people, drums and guitars.",
+    "translation": {
+      "text": "A popular song with people, drums and guitars.",
+      "source": "local",
+      "model": {
+        "id": "Helsinki-NLP/opus-mt-zh-en",
+        "revision": "cf109095479db38d6df799875e34039d4938aaa6"
+      },
+      "segments": 1
+    },
+    "text_segments": 1,
+    "model": {
+      "id": "laion/larger_clap_music",
+      "revision": "a0b4534a14f58e20944452dff00a22a06ce629d1"
+    },
+    "windows": [
+      {
+        "start": 0.0,
+        "valid_seconds": 10.0,
+        "score": 0.005264064905579187
+      },
+      {
+        "start": 10.0,
+        "valid_seconds": 10.0,
+        "score": 0.004669578230728605
+      },
+      {
+        "start": 20.0,
+        "valid_seconds": 10.0,
+        "score": 0.0035123824218540566
+      },
+      {
+        "start": 30.0,
+        "valid_seconds": 10.0,
+        "score": 0.005644749283522642
+      },
+      {
+        "start": 40.0,
+        "valid_seconds": 10.0,
+        "score": 0.0005042137225086483
+      },
+      {
+        "start": 50.0,
+        "valid_seconds": 10.0,
+        "score": 0.0023538390826977427
+      },
+      {
+        "start": 60.0,
+        "valid_seconds": 10.0,
+        "score": 0.001546639958278459
+      },
+      {
+        "start": 70.0,
+        "valid_seconds": 10.0,
+        "score": 0.005121475327036978
+      },
+      {
+        "start": 80.0,
+        "valid_seconds": 10.0,
+        "score": 0.004587789933392145
+      },
+      {
+        "start": 90.0,
+        "valid_seconds": 10.0,
+        "score": 0.0033271174832591264
+      },
+      {
+        "start": 100.0,
+        "valid_seconds": 10.0,
+        "score": 0.0056141348470470104
+      },
+      {
+        "start": 110.0,
+        "valid_seconds": 10.0,
+        "score": 0.002387966624337625
+      },
+      {
+        "start": 120.0,
+        "valid_seconds": 10.0,
+        "score": -0.0008834987299141204
+      },
+      {
+        "start": 130.0,
+        "valid_seconds": 10.0,
+        "score": -0.0007042990655852753
+      },
+      {
+        "start": 140.0,
+        "valid_seconds": 4.4,
+        "score": 0.00722731310799042
+      }
+    ],
+    "audio_protocol": {
+      "sha256": "ea72f036479ce986ed4d290e1a8eaec6e8d48c03832425806c751a1b27613a67",
+      "model": {
+        "id": "laion/larger_clap_music",
+        "revision": "a0b4534a14f58e20944452dff00a22a06ce629d1"
+      },
+      "protocol": "music-eval-v1.0",
+      "sr": 48000,
+      "window": 10,
+      "hop": 10,
+      "tail": "zero_pad"
+    }
+  },
+  "elapsed": 32.16487480001524
+}

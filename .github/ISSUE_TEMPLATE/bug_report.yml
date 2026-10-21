@@ -1,0 +1,30 @@
+name: Bug report / 错误报告
+description: 提交可复现的安装、评估或界面问题
+body:
+  - type: markdown
+    attributes:
+      value: "请勿上传私人音频、访问凭据或未经脱敏的日志。安全漏洞请参阅 SECURITY.md。"
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境 / Environment
+      description: 系统、Python、Node、Git 提交或版本、安装了哪些可选评估器
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 实际行为与期望行为 / Actual and expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 脱敏日志与最小样例 / Sanitized logs or minimal example
+      description: 优先使用合成音频，说明指标状态和错误原因

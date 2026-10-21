@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, cite the repository and the upstream evaluation methods listed in the documentation."
+title: "Music Eval: Local CPU Music Evaluation Workbench"
+type: software
+version: 0.1.0
+license: MIT
+authors:
+  - name: "Music Eval contributors"
+abstract: "A local CPU workbench for evaluating and comparing generated music with explicit metric protocols and optional blind listening."
+keywords:
+  - music-generation
+  - audio-evaluation
+  - CLAP
+  - FAD
+  - CPU
+# Before the first public release, add verified authors, repository-code and URL.
+# Do not invent contributor identities or a repository URL before publication.

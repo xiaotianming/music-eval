@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-21",
+  "purpose": "Post dependency-maintenance offline smoke; no quality ranking",
+  "translation": {
+    "status": "success",
+    "value": {
+      "text": "Sad piano solo, slow, soft, no drums.",
+      "source": "local",
+      "model": {
+        "id": "Helsinki-NLP/opus-mt-zh-en",
+        "revision": "cf109095479db38d6df799875e34039d4938aaa6"
+      },
+      "segments": 1
+    },
+    "elapsed": 14.04625049995957
+  },
+  "clap": {
+    "status": "success",
+    "value": {
+      "score": 0.010068908828057227,
+      "text_used": "A sustained synthetic chord",
+      "translation": null,
+      "text_segments": 1,
+      "model": {
+        "id": "laion/larger_clap_music",
+        "revision": "a0b4534a14f58e20944452dff00a22a06ce629d1"
+      },
+      "windows": [
+        {
+          "start": 0.0,
+          "valid_seconds": 10.0,
+          "score": 0.010247078064992619
+        },
+        {
+          "start": 10.0,
+          "valid_seconds": 10.0,
+          "score": 0.00995498271921709
+        },
+        {
+          "start": 20.0,
+          "valid_seconds": 10.0,
+          "score": 0.010004665699961973
+        }
+      ],
+      "audio_protocol": {
+        "sha256": "3bbde8d18e91c79db5e87810f0a75957c24df65f797d0828203738bf392c3b12",
+        "model": {
+          "id": "laion/larger_clap_music",
+          "revision": "a0b4534a14f58e20944452dff00a22a06ce629d1"
+        },
+        "protocol": "music-eval-v1.0",
+        "sr": 48000,
+        "window": 10,
+        "hop": 10,
+        "tail": "zero_pad"
+      }
+    },
+    "elapsed": 12.768843300000299
+  }
+}

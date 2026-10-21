@@ -1,0 +1,99 @@
+{
+  "hardware": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 170 Stepping 4, GenuineIntel",
+    "cpus": 18,
+    "ram_gb": 31.521785736083984
+  },
+  "models": {
+    "clap": {
+      "id": "laion/larger_clap_music",
+      "revision": "a0b4534a14f58e20944452dff00a22a06ce629d1"
+    },
+    "translation": {
+      "id": "Helsinki-NLP/opus-mt-zh-en",
+      "revision": "cf109095479db38d6df799875e34039d4938aaa6"
+    },
+    "muq": {
+      "id": "OpenMuQ/MuQ-large-msd-iter",
+      "revision": "0562a57814f6f8bbd9fdea0a25921a2fce1a841a"
+    },
+    "songeval": {
+      "id": "ASLP-lab/SongEval",
+      "revision": "848fb2ff3a2a9d64dcb20d46f07238c28abd7add",
+      "weights_sha256": "0cb1eb8be02b96e9949ca3a2b66997c5ac7d9da3567240df4dbfc2048eb98efd"
+    },
+    "fadtk": {
+      "id": "microsoft/fadtk",
+      "revision": "ec74b1f96d5576ec04e721985fa0f0d14d965d9b"
+    },
+    "fad_clap": {
+      "id": "lukewys/laion_clap",
+      "revision": "b3708341862f581175dba5c356a4ebf74a9b6651"
+    }
+  },
+  "input": "synthetic chord; performance only, not quality validation",
+  "run_definition": "Fresh worker per run; first CLAP run removes this synthetic input's embedding cache, repeat reuses embeddings. Not an OS cold-cache benchmark. Download time excluded when predownloaded.",
+  "measurements": [
+    {
+      "duration_seconds": 30,
+      "metric": "clap",
+      "run": "first_process",
+      "audio_embedding_cache_before": false,
+      "status": "success",
+      "reason": null,
+      "seconds": 29.15214570000535,
+      "peak_mb": 1043.90234375
+    },
+    {
+      "duration_seconds": 30,
+      "metric": "clap",
+      "run": "repeat_process",
+      "audio_embedding_cache_before": true,
+      "status": "success",
+      "reason": null,
+      "seconds": 17.202996999956667,
+      "peak_mb": 697.8828125
+    },
+    {
+      "duration_seconds": 180,
+      "metric": "clap",
+      "run": "first_process",
+      "audio_embedding_cache_before": false,
+      "status": "success",
+      "reason": null,
+      "seconds": 43.912963500013575,
+      "peak_mb": 961.07421875
+    },
+    {
+      "duration_seconds": 180,
+      "metric": "clap",
+      "run": "repeat_process",
+      "audio_embedding_cache_before": true,
+      "status": "success",
+      "reason": null,
+      "seconds": 26.591582700028084,
+      "peak_mb": 788.03515625
+    },
+    {
+      "duration_seconds": 300,
+      "metric": "clap",
+      "run": "first_process",
+      "audio_embedding_cache_before": false,
+      "status": "success",
+      "reason": null,
+      "seconds": 47.56508010003017,
+      "peak_mb": 978.6953125
+    },
+    {
+      "duration_seconds": 300,
+      "metric": "clap",
+      "run": "repeat_process",
+      "audio_embedding_cache_before": true,
+      "status": "success",
+      "reason": null,
+      "seconds": 18.63949070003582,
+      "peak_mb": 664.95703125
+    }
+  ]
+}

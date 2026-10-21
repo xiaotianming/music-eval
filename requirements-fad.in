@@ -1,0 +1,11 @@
+fadtk @ git+https://github.com/microsoft/fadtk.git@ec74b1f96d5576ec04e721985fa0f0d14d965d9b
+transformers==4.51.3
+numpy==1.26.4
+torch==2.7.0
+torchaudio==2.7.0
+torchvision==0.22.0
+scipy==1.15.3
+soundfile==0.13.1
+pyloudnorm==0.1.1
+psutil==7.0.0
+imageio-ffmpeg==0.6.0

@@ -1,0 +1,51 @@
+{
+  "translation": {
+    "status": "success",
+    "value": {
+      "text": "Sad piano solo, slow, soft, no drums.",
+      "source": "local",
+      "model": {
+        "id": "Helsinki-NLP/opus-mt-zh-en",
+        "revision": "cf109095479db38d6df799875e34039d4938aaa6"
+      },
+      "segments": 1
+    },
+    "elapsed": 22.957173599977978
+  },
+  "songeval": {
+    "status": "success",
+    "value": {
+      "scores": {
+        "Coherence": 4.230633735656738,
+        "Musicality": 3.8447389602661133,
+        "Memorability": 4.041835784912109,
+        "Clarity": 3.9732117652893066,
+        "Naturalness": 3.930651903152466
+      },
+      "exploratory": false,
+      "full_audio": true,
+      "input_seconds": 144.4,
+      "model": {
+        "id": "ASLP-lab/SongEval",
+        "revision": "848fb2ff3a2a9d64dcb20d46f07238c28abd7add",
+        "weights_sha256": "0cb1eb8be02b96e9949ca3a2b66997c5ac7d9da3567240df4dbfc2048eb98efd"
+      },
+      "muq": {
+        "id": "OpenMuQ/MuQ-large-msd-iter",
+        "revision": "0562a57814f6f8bbd9fdea0a25921a2fce1a841a"
+      },
+      "license": "CC BY-NC-SA 4.0"
+    },
+    "elapsed": 144.69170009996742
+  },
+  "instrumental_default": {
+    "status": "skipped",
+    "reason": "纯音乐默认不运行 SongEval；可开启探索性四维评估",
+    "elapsed": 3.8667158000171185
+  },
+  "input": {
+    "source": "SongEval upstream example; inference smoke only",
+    "sha256": "ea72f036479ce986ed4d290e1a8eaec6e8d48c03832425806c751a1b27613a67",
+    "seconds": 144.4
+  }
+}
