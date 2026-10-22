@@ -1,0 +1,20 @@
+.overall-panel{margin:20px 0;padding:20px;background:#eff6eb;border:1px solid #cedfc4;border-radius:9px;color:#294c35}
+.overall-panel.partial{background:#fbf7ed;border-color:#e4d6b6;color:#69522a}
+.overall-heading{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.overall-heading h3{font-size:16px;margin:0 0 7px}
+.overall-heading p{font-size:12px;margin:0;line-height:1.7}
+.overall-number{white-space:nowrap}
+.overall-number strong{font:600 40px/1.2 Consolas,monospace;letter-spacing:-1.5px}
+.overall-number>span{font-size:13px;margin-left:8px}
+.overall-rule{font-size:12px;margin:15px 0 0;line-height:1.8}
+.overall-missing{font-size:12px;margin:12px 0 0;line-height:1.8}
+.overall-panel details{color:inherit;font-size:12px}
+.overall-panel th{background:transparent;color:inherit;font-size:12px}
+.overall-panel td{font-size:12px;color:inherit;white-space:normal}
+.overall-panel details>p{line-height:1.8;margin-top:14px}
+.overall-compact{display:inline-flex;align-items:baseline;gap:4px;flex-wrap:wrap;color:#276b58}
+.overall-compact strong{font:600 20px Consolas,monospace}
+.overall-compact small{font-size:10px}
+.overall-compact.partial{color:#876b38}
+.overall-compact em{font-size:10px;font-style:normal}
+@media(max-width:560px){.overall-panel{padding:14px}.overall-number strong{font-size:34px}.overall-heading p{max-width:130px}}

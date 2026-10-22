@@ -40,7 +40,7 @@ SongEval and FAD use separate environments. Do not install their dependency stac
 - **FAD:** distribution distance between generated and reference collections. Choose reference music that matches your evaluation task.
 - **Optional listening:** randomized anonymous A/B, ties and skips, reported separately from automatic metrics.
 
-Jobs persist in SQLite, retain input snapshots, and support cancellation, retries and recovery. Reports use prompt-level equal weighting and shared-prompt bootstrap comparisons. No uncalibrated composite score is produced.
+Jobs persist in SQLite, retain input snapshots, and support cancellation, retries and recovery. Reports use prompt-level equal weighting and shared-prompt bootstrap comparisons. A versioned 100-point application score combines aesthetics (70%), text matching (20%) and audio health (10%). Partial scores show coverage; only complete scores enter model-level composite summaries.
 
 ## Development
 

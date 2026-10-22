@@ -10,6 +10,7 @@ import psutil
 from . import db
 from .config import DATA, ROOT, MODELS, PROTOCOL, settings
 from .metrics import fingerprint
+from .scoring import overall_score
 
 TERMINAL = ("success", "failed", "skipped", "cancelled")
 
@@ -72,6 +73,14 @@ def job_view(job_id):
         job["items"] = [db.decode_item(i) for i in db.rows("SELECT * FROM items WHERE job_id=? ORDER BY rowid", (job_id,))]
         job["done"] = sum(i["status"] in TERMINAL for i in job["items"])
         job["total"] = len(job["items"])
+        grouped = {}
+        for item in job["items"]:
+            if item["metric"] != "fad":
+                grouped.setdefault(item["sample_id"], {})[item["metric"]] = item
+        job["overall_scores"] = {
+            sid: overall_score(results, next(iter(results.values()))["snapshot"]["sample"]["audio_type"])
+            for sid, results in grouped.items()
+        }
     return job
 
 

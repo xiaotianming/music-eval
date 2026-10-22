@@ -19,7 +19,7 @@ from . import db
 from .audio import ffmpeg, waveform
 from .config import DATA, ROOT, MODELS, PROTOCOL, settings
 from .jobs import create_job, job_view, runner
-from .reports import latest_results, report, export_csv, export_html, sample_report, export_sample_html
+from .reports import latest_results, report, export_csv, export_html, sample_report, export_sample_html, scored_record
 
 
 @asynccontextmanager
@@ -115,7 +115,11 @@ def update_settings(body: SettingsRequest):
 
 @app.get("/api/samples")
 def samples(ids: str = "", model: str = "", audio_type: str = "", tag: str = ""):
-    return [{**{k: v for k, v in s.items() if k != "path"}, "results": latest_results(s)} for s in selected(ids, model, audio_type, tag)]
+    output = []
+    for sample in selected(ids, model, audio_type, tag):
+        record = scored_record(sample, latest_results(sample))
+        output.append({**record["sample"], "results": record["results"], "overall": record["overall"]})
+    return output
 
 
 @app.post("/api/import")

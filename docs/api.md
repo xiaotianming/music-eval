@@ -59,6 +59,8 @@
 
 单曲报告默认显示最新结果；传入 `job_id` 可查看该任务的输入快照和分数，例如 `/api/samples/{id}/report?job_id={task_id}`。HTML/JSON 导出支持同一个参数。歌曲未参与该任务时返回 404。
 
+样本列表和单曲报告的 `overall` 包含综合分 `score`、满分 `max_score=100`、`version`、`coverage`、分项 `components` 及状态 `complete/partial/unavailable/invalid`。暂定分附带缺项原因。任务查询通过 `overall_scores[sample_id]` 返回该任务的综合分；模型报告中的 `metrics.overall_score` 只汇总完整评分。
+
 `/api/report` 及导出接口支持 `ids`（逗号分隔）、`model`、`version`、`audio_type`、`tag` 查询参数。所有指标遵循相同筛选范围；跨类型音乐不计算配对差异。
 
 错误响应通常使用 FastAPI 的 `detail` 字段：422 表示输入不合法，404 表示对象不存在，409 表示当前状态不允许操作。逐项推理失败不会被替换成 HTTP 成功分数，请检查任务中的状态与原因。
