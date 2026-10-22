@@ -19,7 +19,7 @@ cd music-eval
 ./scripts/start.ps1
 ```
 
-Open <http://127.0.0.1:8000> and load the synthetic demo to try the workflow. Import your generated tracks to compare models.
+Open <http://127.0.0.1:18763> and load the synthetic demo to try the workflow. Import your generated tracks to compare models.
 
 To enable optional CPU models:
 

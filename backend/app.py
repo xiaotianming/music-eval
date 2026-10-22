@@ -40,7 +40,7 @@ async def local_access(request: Request, call_next):
     if host not in ("127.0.0.1", "localhost", "testserver"):
         return Response("仅允许本机访问", status_code=403)
     origin = request.headers.get("origin")
-    if origin and origin not in ("http://" + request.headers.get("host", ""), "http://localhost:5173", "http://127.0.0.1:5173"):
+    if origin and origin not in ("http://" + request.headers.get("host", ""), "http://localhost:18764", "http://127.0.0.1:18764"):
         return Response("跨域请求被拒绝", status_code=403)
     return await call_next(request)
 

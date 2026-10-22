@@ -1,4 +1,4 @@
-param([int]$Port = 8000)
+param([ValidateRange(1,65535)][int]$Port = 18763)
 $ErrorActionPreference = 'Stop'
 Set-Location (Split-Path $PSScriptRoot -Parent)
 if (-not (Test-Path '.venv/Scripts/python.exe')) { throw '请先运行 ./scripts/setup.ps1' }

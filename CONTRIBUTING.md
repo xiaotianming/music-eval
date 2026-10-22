@@ -21,13 +21,13 @@ cd ..
 
 ```powershell
 # 终端 1，项目根目录
-./.venv/Scripts/python.exe -m uvicorn backend.app:app --host 127.0.0.1 --port 8000
+./.venv/Scripts/python.exe -m uvicorn backend.app:app --host 127.0.0.1 --port 18763
 # 终端 2
 cd frontend
 npm run dev
 ```
 
-修改后端后重启服务。同一数据目录运行一个后端进程。前端开发地址为 Vite 输出的本地 URL，API 代理到 8000 端口。
+修改后端后重启服务。同一数据目录运行一个后端进程。前端开发地址为 Vite 输出的本地 URL，API 代理到 18763 端口。
 
 ## 提交前检查
 

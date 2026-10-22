@@ -16,6 +16,8 @@
 
 ### Changed
 
+- 默认服务端口改为 18763，前端开发端口改为 18764。
+
 - 使用官方 npm registry、Node.js 22 LTS 及更新后的 Vite 修复版本。
 - 更新核心 Web/上传/测试依赖及模型 extra 的 protobuf、sentencepiece 补丁。
 - 记录仍需后续迁移的 Transformers 研究依赖通告与 SongEval 许可冲突。

@@ -41,9 +41,11 @@ cd music-eval
 ./scripts/start.ps1
 ```
 
-打开 <http://127.0.0.1:8000>，API 文档在 <http://127.0.0.1:8000/docs>。默认仅本机访问。首次模型下载需要网络；离线前先完成模型预下载和一次所需指标推理，随后在运行设置开启离线模式。FAD 也需要固定的 RoBERTa 配置和分词器，因此预下载命令中包含 `roberta`，但不会另下载 RoBERTa 模型权重。
+打开 <http://127.0.0.1:18763>，API 文档在 <http://127.0.0.1:18763/docs>。默认仅本机访问。首次模型下载需要网络；离线前先完成模型预下载和一次所需指标推理，随后在运行设置开启离线模式。FAD 也需要固定的 RoBERTa 配置和分词器，因此预下载命令中包含 `roberta`，但不会另下载 RoBERTa 模型权重。
 
 先运行 `setup.ps1`、`start.ps1`，在网页点击“载入流程示例”即可试用基础检查、对比和导出。CLAP、翻译、SongEval 和 FAD 按需安装。完整模型栈的安装脚本适用于 Windows；Linux CI 覆盖基础后端测试。
+
+默认服务端口为 `18763`，前端开发端口为 `18764`。需要其他端口时可运行 `./scripts/start.ps1 -Port 18765`。
 
 ## 文档导航
 
@@ -109,7 +111,7 @@ FAD 按模型版本和音乐类型分组，并只使用相同音乐类型的已�
 cd frontend
 npm ci
 npm run build
-npm run dev   # Vite 5173，代理到后端 8000
+npm run dev   # Vite 18764，代理到后端 18763
 ```
 
 主环境的依赖和模型版本分别锁定在 `uv.lock`、`models.lock.json`；独立环境使用两个 `requirements-*.lock`，CPU torch/torchaudio/torchvision 版本在安装脚本中固定。`fadtk` 需要 NumPy 1.x，因此不能直接装进主环境。
